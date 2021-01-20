@@ -13,22 +13,36 @@ Usage: aquarium.sh [options] <up|down>
 
 Options:
   --no-*, --with-*                    disable/enable installation of selected
-                                      component (choice from: kata,
-                                        registry-proxy, monitoring, serverless,
-                                        service-mesh, storage, local-registry)
-                                      (env: non-zero value on INSTALL_*)
-  -N <name>, --name <name>            cluster name
-                                      (default: k3s-default, env: CLUSTER_NAME)
-  -n <num>, --num <num>               number of workers
-                                      (default: nproc/4, env: NUM_WORKERS)
-  -r <runtime>, --runtime <runtime>   runtime choice
-                                      (default: k3d, env: K8S_RUNTIME)
-                                      (choice of: k3d, kubedee)
-  -t <tag>, --tag <tag>               runtime version (env: RUNTIME_TAG)
+                                      component (choice of: registry-proxy,
+                                        monitoring, serverless, service-mesh,
+                                        storage, local-registry,
+                                        env: non-zero value on INSTALL_*)
+  -N <name>, --name <name>            cluster name (default: k3s-default,
+                                        env: CLUSTER_NAME)
+  -n <num>, --num <num>               number of workers (default: `nproc`/4,
+                                        env: NUM_WORKERS)
+  -r <runtime>, --runtime <runtime>   runtime choice (default: k3d,
+                                        choice of: k3d, kubedee,
+                                        env: K8S_RUNTIME)
+  -t <tag>, --tag <tag>               set runtime version (env: RUNTIME_TAG)
+  -s <pool>, --storage-pool <pool>    LXD storage pool to use with Kubedee
+                                        (default: default,
+                                        env: LXD_STORAGE_POOL)
+  --vm                                launch cluster in LXD VMs, instead of LXD
+                                        containers (requires `-r kubedee`)
+  -c <mem>, --controller-mem <mem>    memory to allocate towards K8S controller
+                                        (requires `--vm`, default: 2GiB,
+                                        env: CONTROLLER_MEMORY_SIZE)
+  -w <mem>, --worker-mem <mem>        memory to allocate per K8S worker
+                                        (requires `--vm`, default: 4GiB,
+                                        env: WORKER_MEMORY_SIZE)
+  -R <size>, --rootfs-size <size>     build rootfs image of provided size
+                                        (requires `--vm`, default: 20GiB,
+                                        env: ROOTFS_SIZE)
 
 Environment variables:
 
-  Registry proxy (ref: https://github.com/rpardini/docker-registry-proxy#usage):
+  Registry proxy (ref: https://github.com/rpardini/docker-registry-proxy#usage ):
     PROXY_REGISTRIES    space-delimited string listing registry domains to cache
                         OCI image layers from
     AUTH_REGISTRIES     space-delimited string listing "domain:username:password"
@@ -71,7 +85,7 @@ Binaries/scripts (but not OCI images or Helm charts) listed below are expected t
 
 - [docker-volume-loopback](https://github.com/ashald/docker-volume-loopback) (when Docker root is running on a filesystem not supporting overlays)
 - [docker-registry-proxy](https://github.com/rpardini/docker-registry-proxy) (transparent proxy for caching OCI image layers)
-- [Kata Containers](https://github.com/kata-containers/runtime)
+- [Kata Containers](https://github.com/kata-containers/kata-containers)
 
 ### Charts/software used, depending on component selection
 
@@ -85,11 +99,11 @@ Logical components are split into namespaces according to the following logic:
     - [Harbor](https://github.com/goharbor/harbor) for cluster-local registry
 - network/service mesh: [Istio](https://github.com/istio/istio)
 - monitoring: [Prometheus-Operator](https://github.com/coreos/prometheus-operator) with [Thanos](https://github.com/thanos-io/thanos)
-- serverless: [Kubeless](https://github.com/kubeless/kubeless), possibly subject to change
+- serverless: [OpenFAAS](https://docs.openfaas.com/), possibly [Kubeless](https://github.com/kubeless/kubeless)
 
 ## Known issues
 
-- K3D: Kata doesn't work - sorry, use Kubedee
+- Kata's available only through Kubedee
 - Kubedee: Registry proxy not deployed as an LXD container, making Docker a harder dependency than it genuinely needs to be
 - cluster-wide pod security policies are just awful
 - most likely inconsistent whitespace handling, deal with it

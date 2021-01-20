@@ -34,10 +34,13 @@ deployment:
   custom_dashboards:
     excludes: ['']
     includes: ['*']
+  hpa:
+    api_version: "autoscaling/v2beta2"
+    spec: {}
   image_name: quay.io/kiali/kiali
   image_pull_policy: "Always"
   image_pull_secrets: []
-  image_version: v1.27.0
+  image_version: v1.29.0
   ingress_enabled: true
   logger:
     log_format: "text"
@@ -56,7 +59,7 @@ deployment:
   service_annotations: {}
   service_type: ""
   tolerations: []
-  version_label: v1.27.0
+  version_label: v1.29.0
   view_only_mode: false
 
 external_services:

@@ -20,7 +20,7 @@ repositories:
 - name: bitnami  # https://github.com/bitnami/charts/ for RMQ and Memcached, replace MySQL with pgSQL/Patroni
   url: "https://charts.bitnami.com/bitnami"
 
-{{- $credentials := dict "database" (dict "root" (dict "scheme" (default "postgresql+psycopg2" (env "DB_SCHEME")) "host" (default "patroni" (env "DB_HOST")) "port" (default 5432 (env "DB_PORT")) "user" (default "postgres" (env "DB_ROOT_USER")) "pass" (default "tea" (env "DB_ROOT_PASS"))) "keystone" (dict "name" (default "keystone" (env "DB_KEYSTONE_NAME")) "user" (default "keystone" (env "DB_KEYSTONE_USER")) "pass" (default "keystone" (env "DB_KEYSTONE_PASS"))) "glance" (dict "name" (default "glance" (env "DB_GLANCE_NAME")) "user" (default "glance" (env "DB_GLANCE_USER")) "pass" (default "glance" (env "DB_GLANCE_PASS"))) "cinder" (dict "name" (default "cinder" (env "DB_CINDER_NAME")) "user" (default "cinder" (env "DB_CINDER_USER")) "pass" (default "cinder" (env "DB_CINDER_PASS"))) "nova" (dict "name" (default "nova" (env "DB_NOVA_NAME")) "user" (default "nova" (env "DB_NOVA_USER")) "pass" (default "nova" (env "DB_NOVA_PASS"))) "nova_api" (dict "name" (default "nova_api" (env "DB_NOVA_API_NAME")) "user" (default "nova_api" (env "DB_NOVA_API_USER")) "pass" (default "nova_api" (env "DB_NOVA_API_PASS"))) "nova_cell0" (dict "name" (default "nova_cell0" (env "DB_NOVA_CELL0_NAME")) "user" (default "nova_cell0" (env "DB_NOVA_CELL0_USER")) "pass" (default "nova_cell0" (env "DB_NOVA_CELL0_PASS"))) "neutron" (dict "name" (default "neutron" (env "DB_NEUTRON_NAME")) "user" (default "neutron" (env "DB_NEUTRON_USER")) "pass" (default "neutron" (env "DB_NEUTRON_PASS"))) "heat" (dict "name" (default "heat" (env "DB_HEAT_NAME")) "user" (default "heat" (env "DB_HEAT_USER")) "pass" (default "heat" (env "DB_HEAT_PASS"))) "horizon" (dict "name" (default "horizon" (env "DB_HORIZON_NAME")) "user" (default "horizon" (env "DB_HORIZON_USER")) "pass" (default "horizon" (env "DB_HORIZON_PASS"))) "barbican" (dict "name" (default "barbican" (env "DB_BARBICAN_NAME")) "user" (default "barbican" (env "DB_BARBICAN_USER")) "pass" (default "barbican" (env "DB_BARBICAN_PASS"))) "octavia" (dict "name" (default "octavia" (env "DB_OCTAVIA_NAME")) "user" (default "octavia" (env "DB_OCTAVIA_USER")) "pass" (default "octavia" (env "DB_OCTAVIA_PASS"))) "placement" (dict "name" (default "placement" (env "DB_PLACEMENT_NAME")) "user" (default "placement" (env "DB_PLACEMENT_USER")) "pass" (default "placement" (env "DB_PLACEMENT_PASS"))) "designate" (dict "name" (default "designate" (env "DB_DESIGNATE_NAME")) "user" (default "designate" (env "DB_DESIGNATE_USER")) "pass" (default "designate" (env "DB_DESIGNATE_PASS"))) "powerdns" (dict "name" (default "powerdns" (env "DB_POWERDNS_NAME")) "user" (default "powerdns" (env "DB_POWERDNS_USER")) "pass" (default "powerdns" (env "DB_POWERDNS_PASS")))) "rabbitmq" (dict "root" (dict "host" (default "rabbitmq" (env "RMQ_HOST")) "user" (default "rabbitmq" (env "RMQ_ROOT_USER")) "pass" (default "rabbitmq" (env "RMQ_ROOT_PASS")) "cookie" (default "BYWVYUKFWOTNDQNLDTDN" (env "RMQ_COOKIE"))) "keystone" (dict "user" (default "keystone" (env "RMQ_KEYSTONE_USER")) "pass" (default "keystone" (env "RMQ_KEYSTONE_PASS"))) "glance" (dict "user" (default "glance" (env "RMQ_GLANCE_USER")) "pass" (default "glance" (env "RMQ_GLANCE_PASS"))) "cinder" (dict "user" (default "cinder" (env "RMQ_CINDER_USER")) "pass" (default "cinder" (env "RMQ_CINDER_PASS"))) "nova" (dict "user" (default "nova" (env "RMQ_NOVA_USER")) "pass" (default "nova" (env "RMQ_NOVA_PASS"))) "neutron" (dict "user" (default "neutron" (env "RMQ_NEUTRON_USER")) "pass" (default "neutron" (env "RMQ_NEUTRON_PASS"))) "barbican" (dict "user" (default "barbican" (env "RMQ_BARBICAN_USER")) "pass" (default "barbican" (env "RMQ_BARBICAN_PASS"))) "heat" (dict "user" (default "heat" (env "RMQ_HEAT_USER")) "pass" (default "heat" (env "RMQ_HEAT_PASS"))) "octavia" (dict "user" (default "octavia" (env "RMQ_OCTAVIA_USER")) "pass" (default "octavia" (env "RMQ_OCTAVIA_PASS"))) "designate" (dict "user" (default "designate" (env "RMQ_DESIGNATE_USER")) "pass" (default "designate" (env "RMQ_DESIGNATE_PASS")))) }}
+{{- $credentials := dict "database" (dict "root" (dict "scheme" (default "postgresql+psycopg2" (env "DB_SCHEME")) "host" (default "patroni" (env "DB_HOST")) "port" (default 5432 (env "DB_PORT")) "user" (default "postgres" (env "DB_ROOT_USER")) "pass" (default "tea" (env "DB_ROOT_PASS"))) "keystone" (dict "name" (default "keystone" (env "DB_KEYSTONE_NAME")) "user" (default "keystone" (env "DB_KEYSTONE_USER")) "pass" (default "keystone" (env "DB_KEYSTONE_PASS"))) "glance" (dict "name" (default "glance" (env "DB_GLANCE_NAME")) "user" (default "glance" (env "DB_GLANCE_USER")) "pass" (default "glance" (env "DB_GLANCE_PASS"))) "cinder" (dict "name" (default "cinder" (env "DB_CINDER_NAME")) "user" (default "cinder" (env "DB_CINDER_USER")) "pass" (default "cinder" (env "DB_CINDER_PASS"))) "nova" (dict "name" (default "nova" (env "DB_NOVA_NAME")) "user" (default "nova" (env "DB_NOVA_USER")) "pass" (default "nova" (env "DB_NOVA_PASS"))) "nova_api" (dict "name" (default "nova_api" (env "DB_NOVA_API_NAME")) "user" (default "nova_api" (env "DB_NOVA_API_USER")) "pass" (default "nova_api" (env "DB_NOVA_API_PASS"))) "nova_cell0" (dict "name" (default "nova_cell0" (env "DB_NOVA_CELL0_NAME")) "user" (default "nova_cell0" (env "DB_NOVA_CELL0_USER")) "pass" (default "nova_cell0" (env "DB_NOVA_CELL0_PASS"))) "neutron" (dict "name" (default "neutron" (env "DB_NEUTRON_NAME")) "user" (default "neutron" (env "DB_NEUTRON_USER")) "pass" (default "neutron" (env "DB_NEUTRON_PASS"))) "heat" (dict "name" (default "heat" (env "DB_HEAT_NAME")) "user" (default "heat" (env "DB_HEAT_USER")) "pass" (default "heat" (env "DB_HEAT_PASS"))) "horizon" (dict "name" (default "horizon" (env "DB_HORIZON_NAME")) "user" (default "horizon" (env "DB_HORIZON_USER")) "pass" (default "horizon" (env "DB_HORIZON_PASS"))) "barbican" (dict "name" (default "barbican" (env "DB_BARBICAN_NAME")) "user" (default "barbican" (env "DB_BARBICAN_USER")) "pass" (default "barbican" (env "DB_BARBICAN_PASS"))) "octavia" (dict "name" (default "octavia" (env "DB_OCTAVIA_NAME")) "user" (default "octavia" (env "DB_OCTAVIA_USER")) "pass" (default "octavia" (env "DB_OCTAVIA_PASS"))) "placement" (dict "name" (default "placement" (env "DB_PLACEMENT_NAME")) "user" (default "placement" (env "DB_PLACEMENT_USER")) "pass" (default "placement" (env "DB_PLACEMENT_PASS"))) "designate" (dict "name" (default "designate" (env "DB_DESIGNATE_NAME")) "user" (default "designate" (env "DB_DESIGNATE_USER")) "pass" (default "designate" (env "DB_DESIGNATE_PASS"))) "powerdns" (dict "name" (default "powerdns" (env "DB_POWERDNS_NAME")) "user" (default "powerdns" (env "DB_POWERDNS_USER")) "pass" (default "powerdns" (env "DB_POWERDNS_PASS"))) "magnum" (dict "name" (default "magnum" (env "DB_MAGNUM_NAME")) "user" (default "magnum" (env "DB_MAGNUM_USER")) "pass" (default "magnum" (env "DB_MAGNUM_PASS"))) "senlin" (dict "name" (default "senlin" (env "DB_SENLIN_NAME")) "user" (default "senlin" (env "DB_SENLIN_USER")) "pass" (default "magnum" (env "DB_SENLIN_PASS")))) "rabbitmq" (dict "root" (dict "host" (default "rabbitmq" (env "RMQ_HOST")) "user" (default "rabbitmq" (env "RMQ_ROOT_USER")) "pass" (default "rabbitmq" (env "RMQ_ROOT_PASS")) "cookie" (default "BYWVYUKFWOTNDQNLDTDN" (env "RMQ_COOKIE"))) "keystone" (dict "user" (default "keystone" (env "RMQ_KEYSTONE_USER")) "pass" (default "keystone" (env "RMQ_KEYSTONE_PASS"))) "glance" (dict "user" (default "glance" (env "RMQ_GLANCE_USER")) "pass" (default "glance" (env "RMQ_GLANCE_PASS"))) "cinder" (dict "user" (default "cinder" (env "RMQ_CINDER_USER")) "pass" (default "cinder" (env "RMQ_CINDER_PASS"))) "nova" (dict "user" (default "nova" (env "RMQ_NOVA_USER")) "pass" (default "nova" (env "RMQ_NOVA_PASS"))) "neutron" (dict "user" (default "neutron" (env "RMQ_NEUTRON_USER")) "pass" (default "neutron" (env "RMQ_NEUTRON_PASS"))) "barbican" (dict "user" (default "barbican" (env "RMQ_BARBICAN_USER")) "pass" (default "barbican" (env "RMQ_BARBICAN_PASS"))) "heat" (dict "user" (default "heat" (env "RMQ_HEAT_USER")) "pass" (default "heat" (env "RMQ_HEAT_PASS"))) "octavia" (dict "user" (default "octavia" (env "RMQ_OCTAVIA_USER")) "pass" (default "octavia" (env "RMQ_OCTAVIA_PASS"))) "designate" (dict "user" (default "designate" (env "RMQ_DESIGNATE_USER")) "pass" (default "designate" (env "RMQ_DESIGNATE_PASS"))) "magnum" (dict "user" (default "magnum" (env "RMQ_MAGNUM_USER")) "pass" (default "magnum" (env "RMQ_MAGNUM_PASS"))) "senlin" (dict "user" (default "senlin" (env "RMQ_SENLIN_USER")) "pass" (default "senlin" (env "RMQ_SENLIN_PASS")))) }}
 {{- $databaseSikrit := "openstack-on-pg" }}
 
 {{- $chartVersions := dict "mariadb" (default "4.4.6" (env "CHART_VERSION_MARIADB")) "memcached" (default "4.2.27" (env "CHART_VERSION_MEMCACHED")) "rabbitmq" (default "7.8.0" (env "CHART_VERSION_RABBITMQ")) "rook" (default "v1.4.7" (env "CHART_VERSION_ROOK")) "mysql" (default "6.14.12" (env "CHART_VERSION_MYSQL")) }}
@@ -33,7 +33,7 @@ repositories:
 {{- $rookClusterName := "my-cluster" }}
 {{- $rookHostBasedOSDs := true }}
 {{- $rookEnableRBD := true }}
-{{- $rookEnableRGW := true }}
+{{- $rookEnableRGW := false }}
 {{- $rookObjectStoreName := "my-store" }}
 {{- $rookObjectStoreStorageClass := "rook-ceph-bucket" }}
 {{- $cephExampleReplPool := "replicapool" }}
@@ -90,19 +90,21 @@ templates:
       events: ["prepare"]
       command: "/bin/sh"
       args:
-      - "-xec"
+      - "-xc"
+      #- "sed -i 's#^\\(\\s*repository:\\).*#\\1 file://../../openstack-helm-infra/helm-toolkit#g' $(find ../charts/openstack-helm -type f -name requirements.yaml)"
       - "sed -i 's#^\\(\\s*repository:\\).*#\\1 file://../../openstack-helm-infra/helm-toolkit#g' $(find ../charts/openstack-helm -type f -name requirements.yaml); find ../charts/openstack-helm -type f -name requirements.lock -delete"
     - &helmToolkitDependencyFixupL1
       events: ["prepare"]
       command: "/bin/sh"
       args:
-      - "-xec"
+      - "-xc"
+      #- "sed -i 's#^\\(\\s*repository:\\).*#\\1 file://../helm-toolkit#g' ../charts/openstack-helm-infra/ceph-provisioners/requirements.yaml ../charts/openstack-helm-infra/libvirt/requirements.yaml ../charts/openstack-helm-infra/openvswitch/requirements.yaml ../charts/openstack-helm-infra/powerdns/requirements.yaml"
       - "sed -i 's#^\\(\\s*repository:\\).*#\\1 file://../helm-toolkit#g' ../charts/openstack-helm-infra/ceph-provisioners/requirements.yaml ../charts/openstack-helm-infra/libvirt/requirements.yaml ../charts/openstack-helm-infra/openvswitch/requirements.yaml ../charts/openstack-helm-infra/powerdns/requirements.yaml; find ../charts/openstack-helm-infra -type f -name requirements.lock -delete"
     values:
     - &openstackCommon
       # related: https://docs.openstack.org/nova/latest/reference/threading.html#mysql-access-and-eventlet
       conf:  # greenlet workaround
-{{- range $asyncSvc := list "keystone" "glance" "cinder" "heat" "neutron" "nova" "barbican" "octavia" "designate" }}
+{{- range $asyncSvc := list "keystone" "glance" "cinder" "heat" "neutron" "nova" "barbican" "octavia" "designate" "magnum" "senlin" }}
         {{ $asyncSvc }}:
           oslo_messaging_rabbit:
             heartbeat_timeout_threshold: 0
@@ -111,7 +113,7 @@ templates:
           logger_root:
             level: TRACE
             handlers: stdout
-{{- range $logger := list "amqp" "amqplib" "eventletwsgi" "sqlalchemy" "boto" "keystone" "glance" "cinder" "heat" "neutron" "neutron_taas" "nova" "os.brick" "placement" "barbican" "octavia" "designate" }}
+{{- range $logger := list "amqp" "amqplib" "eventletwsgi" "sqlalchemy" "boto" "keystone" "glance" "cinder" "heat" "neutron" "neutron_taas" "nova" "os.brick" "placement" "barbican" "octavia" "designate" "magnum" "senlin" "manila" "trove" }}
           logger_{{ $logger }}:
             level: TRACE
 {{- end }}
@@ -128,7 +130,7 @@ templates:
 {{- else }}
                   internal: ""
 {{- end }}
-{{- range $osloDbSvc := list "keystone" "glance" "cinder" "heat" "nova" "placement" "neutron" "barbican" "octavia" "powerdns" "designate" }}
+{{- range $osloDbSvc := list "keystone" "glance" "cinder" "heat" "nova" "placement" "neutron" "barbican" "octavia" "powerdns" "designate" "magnum" "senlin" }}
             {{ $osloDbSvc }}:
               username: {{ index (default (dict) (index $credentials.database $osloDbSvc)) "user" | quote }}
               password: {{ index (default (dict) (index $credentials.database $osloDbSvc)) "pass" | quote }}
@@ -153,7 +155,7 @@ templates:
             admin:
               username: {{ $credentials.rabbitmq.root.user | quote }}
               password: {{ $credentials.rabbitmq.root.pass | quote }}
-{{- range $rabbitSvc := list "keystone" "glance" "cinder" "heat" "nova" "neutron" "barbican" "octavia" "designate" }}
+{{- range $rabbitSvc := list "keystone" "glance" "cinder" "heat" "nova" "neutron" "barbican" "octavia" "designate" "magnum" "senlin" }}
             {{ $rabbitSvc }}:
               username: {{ index (default (dict) (index $credentials.rabbitmq $rabbitSvc)) "user" | quote }}
               password: {{ index (default (dict) (index $credentials.rabbitmq $rabbitSvc)) "pass" | quote }}
@@ -394,7 +396,7 @@ releases:
     replicaCount: {{ default 2 (env "RDBMS_COUNT") }}
     image:
       repository: registry.opensource.zalan.do/acid/spilo-13
-      tag: 2.0-p2
+      tag: 2.0-p5
 {{- if $openstackEnableTLS }}
     tls:
       issuerRef:
@@ -420,8 +422,8 @@ releases:
       bootstrap:
         dcs:
           synchronous_mode: true
-          synchronous_mode_count: 1
           #synchronous_mode_strict: true
+          synchronous_node_count: 1
           postgresql:
             parameters:
               huge_pages: "off"
@@ -432,6 +434,10 @@ releases:
         - data-checksums
         - locale: en_US.UTF-8
         - encoding: UTF-8
+      postgresql:
+        parameters:
+          log_destination: stderr
+          logging_collector: "off"
     credentials:
       superuser: {{ $credentials.database.root.pass | quote }}
 
@@ -544,8 +550,8 @@ releases:
           image: ceph/ceph:v15
           allowUnsupported: false
         mon:
-          count: {{ default 1 (env "CEPH_MON_COUNT") }}
-          #allowMultiplePerNode: true
+          count: {{ default 3 (env "CEPH_MON_COUNT") }}
+          allowMultiplePerNode: true
         mgr:
           modules:
           - name: pg_autoscaler
@@ -997,6 +1003,9 @@ releases:
   hooks:
   - *helmToolkitDependencyFixupL2
   values:
+{{- if $openstackEnableTLS }}
+  - ../charts/openstack-helm/glance/values_overrides/tls.yaml
+{{- end }}
   - *openstackCommon
   - storage: rbd
     conf:
@@ -1019,20 +1028,31 @@ releases:
         <<: *openstackControlNodeSelector
       registry:
         <<: *openstackControlNodeSelector
-    network:
-      registry:
-        ingress:
-          annotations:
-            nginx.org/rewrites: "serviceName=glance-api rewrite=/"
     pod:
       replicas:
         api: 1
         registry: 1
+    network:
+      api:
+        ingress:
+          annotations:
+            nginx.org/rewrites: "serviceName=glance-api rewrite=/"
 {{- if $openstackEnableTLS }}
+            nginx.org/ssl-services: "glance-api"
+{{- end }}
+      registry:
+        ingress:
+          annotations:
+            nginx.org/rewrites: "serviceName=glance-api rewrite=/"
+{{- if $openstackEnableTLS }}
+            nginx.org/ssl-services: "glance-api"
     manifests:
       certificates: true
       job_bootstrap: false
     endpoints:
+      identity:
+        scheme:
+          default: http
       image:
         host_fqdn_override:
           default:
@@ -1155,6 +1175,9 @@ releases:
   hooks:
   - *helmToolkitDependencyFixupL2
   values:
+{{- if $openstackEnableTLS }}
+  - ../charts/openstack-helm/heat/values_overrides/tls.yaml
+{{- end }}
   - *openstackCommon
   - images:
       tags:
@@ -1199,6 +1222,9 @@ releases:
     manifests:
       certificates: true
     endpoints:
+      identity:
+        scheme:
+          default: http
       orchestration:
         host_fqdn_override:
           default:
@@ -1290,6 +1316,9 @@ releases:
                 iptables -t nat -C POSTROUTING -s {{ $openstackNeutronConfig.external.cidr }} -o {{ $openstackNeutronConfig.providerInterface }} -j MASQUERADE || iptables -t nat -A POSTROUTING -s {{ $openstackNeutronConfig.external.cidr }} -o {{ $openstackNeutronConfig.providerInterface }} -j MASQUERADE
       EOF
   values:
+{{- if $openstackEnableTLS }}
+  - ../charts/openstack-helm/neutron/values_overrides/tls.yaml
+{{- end }}
   - *openstackCommon
   - images:
       tags:
@@ -1337,6 +1366,9 @@ releases:
         ingress:
           annotations:
             nginx.org/rewrites: "serviceName=neutron-server rewrite=/"
+{{- if $openstackEnableTLS }}
+            nginx.org/ssl-services: "neutron-server"
+{{- end }}
     conf:
       neutron:
         DEFAULT:
@@ -1380,6 +1412,9 @@ releases:
 {{- if $openstackEnableTLS }}
       certificates: true
     endpoints:
+      identity:
+        scheme:
+          default: http
       network:
         host_fqdn_override:
           default:
@@ -1430,6 +1465,9 @@ releases:
   hooks:
   - *helmToolkitDependencyFixupL2
   values:
+{{- if $openstackEnableTLS }}
+  - ../charts/openstack-helm/nova/values_overrides/tls.yaml
+{{- end }}
   - *openstackCommon
   - images:
       tags:
@@ -1478,20 +1516,37 @@ releases:
         ingress:
           annotations:
             nginx.org/rewrites: "serviceName=nova-api rewrite=/"
+{{- if $openstackEnableTLS }}
+            nginx.org/ssl-services: "nova-api"
+{{- end }}
       metadata:
         ingress:
           annotations:
             nginx.org/rewrites: "serviceName=nova-metadata rewrite=/"
+{{- if $openstackEnableTLS }}
+            nginx.org/ssl-services: "nova-metadata"
+{{- end }}
       novncproxy:
         ingress:
           annotations:
             nginx.org/rewrites: "serviceName=nova-novncproxy rewrite=/"
+{{- if $openstackEnableTLS }}
+            nginx.org/ssl-services: "nova-novncproxy"
+{{- end }}
             nginx.org/websocket-services: nova-novncproxy
       #placement:
       #  ingress:
       #    annotations:
       #      nginx.org/rewrites: "serviceName=placement-api rewrite=/"
+{{- if $openstackEnableTLS }}
+      #      nginx.org/ssl-services: "placement-api"
+{{- end }}
     endpoints:
+{{- if $openstackEnableTLS }}
+      identity:
+        scheme:
+          default: http
+{{- end }}
       oslo_db_api:
         auth:
           admin:
@@ -1839,6 +1894,64 @@ releases:
         producer: 1
         sink: 1
         worker: 1
+
+- name: magnum
+  namespace: {{ $openstackNamespace }}
+  chart: ../charts/openstack-helm/magnum
+  installed: false
+  labels:
+    app: openstack
+  needs:
+  - {{ $openstackNamespace }}/keystone
+  hooks:
+  - *helmToolkitDependencyFixupL2
+  values:
+  - *openstackCommon
+  - images:
+      tags:
+        magnum_api: {{ $registryAddress }}/magnum:{{ $openstackTag }}
+        magnum_conductor: {{ $registryAddress }}/magnum:{{ $openstackTag }}
+        magnum_db_sync: {{ $registryAddress }}/magnum:{{ $openstackTag }}
+    labels:
+      api:
+        <<: *openstackControlNodeSelector
+      conductor:
+        <<: *openstackControlNodeSelector
+      job:
+        <<: *openstackControlNodeSelector
+
+- name: senlin
+  namespace: {{ $openstackNamespace }}
+  chart: ../charts/openstack-helm/senlin
+  installed: false
+  labels:
+    app: openstack
+  needs:
+  - {{ $openstackNamespace }}/keystone
+  hooks:
+  - *helmToolkitDependencyFixupL2
+  values:
+  - *openstackCommon
+  - images:
+      tags:
+        senlin_api: {{ $registryAddress }}/magnum:{{ $openstackTag }}
+        senlin_db_sync: {{ $registryAddress }}/magnum:{{ $openstackTag }}
+        senlin_engine: {{ $registryAddress }}/magnum:{{ $openstackTag }}
+        senlin_engine_cleaner: {{ $registryAddress }}/magnum:{{ $openstackTag }}
+    labels:
+      api:
+        <<: *openstackControlNodeSelector
+      engine:
+        <<: *openstackControlNodeSelector
+      job:
+        <<: *openstackControlNodeSelector
+    network:
+      dashboard:
+        ingress:
+          annotations:
+            nginx.org/rewrites: "serviceName=senlin-api rewrite=/"
+
+# would love to do manila and trove helm charts some day
 
 - name: horizon
   namespace: {{ $openstackNamespace }}

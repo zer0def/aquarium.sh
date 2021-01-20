@@ -3,7 +3,7 @@
 MYDIR="$(dirname "$(readlink -f "${0}")")"
 
 DEFAULT_PROXY_REGISTRIES=(ghcr.io k8s.gcr.io gcr.io quay.io "registry.opensource.zalan.do")
-REGISTRY_PROXY_REPO="${REGISTRY_PROXY_REPO:="rpardini/docker-registry-proxy:0.6.1"}"
+REGISTRY_PROXY_REPO="${REGISTRY_PROXY_REPO:="rpardini/docker-registry-proxy:0.6.3"}"
 
 usage(){
   local MYNAME="$(basename "${0}")"
@@ -13,22 +13,24 @@ ${MYNAME%.*} - Openstack+Ceph-on-K8S dev environment on LXD VMs via Kubedee
 Usage: ${0} [options] <up|down>
 
 Options:
-  -N <name>, --name <name>             cluster name
-                                       (default: ${CLUSTER_NAME}, env: CLUSTER_NAME)
-  -n <num>, --num <num>                number of workers
-                                       (default: ${NUM_WORKERS}, env: NUM_WORKERS)
-  -V <tag>, --tag <tag>                Kubernetes version to use
-                                       (default: ${K8S_VERSION}, env: K8S_VERSION)
-  -s <pool>, --storage-pool <pool>     LXD storage pool to use for the K8S cluster
-                                       (default: ${LXD_STORAGE_POOL}, env: LXD_STORAGE_POOL)
-  -o <tag>, --openstack-version <tag>  Openstack version to deploy
-                                       (default: ${OS_VERSION}, env: OS_VERSION)
-  -b <base>, --base-image <base>       base LOCI image to use for Openstack
-                                       images (default: ${BASE_IMAGE}, env: BASE_IMAGE)
-  -c <mem>, --controller-mem <mem>     memory to allocate towards K8S controller
-                                       (default: ${CONTROLLER_MEMORY_SIZE}, env: CONTROLLER_MEMORY_SIZE)
-  -w <mem>, --worker-mem <mem>         memory to allocate per K8S worker
-                                       (default: ${WORKER_MEMORY_SIZE}, env: WORKER_MEMORY_SIZE)
+  -N <name>, --name <name>              cluster name
+                                        (default: ${CLUSTER_NAME}, env: CLUSTER_NAME)
+  -n <num>, --num <num>                 number of workers
+                                        (default: ${NUM_WORKERS}, env: NUM_WORKERS)
+  -V <tag>, --tag <tag>                 Kubernetes version to use
+                                        (default: ${K8S_VERSION}, env: K8S_VERSION)
+  -s <pool>, --storage-pool <pool>      LXD storage pool to use for the K8S cluster
+                                        (default: ${LXD_STORAGE_POOL}, env: LXD_STORAGE_POOL)
+  -o <tag>, --openstack-version <tag>   Openstack version to deploy
+                                        (default: ${OS_VERSION}, env: OS_VERSION)
+  -b <base>, --base-image <base>        base LOCI image to use for Openstack
+                                        images (default: ${BASE_IMAGE}, env: BASE_IMAGE)
+  -c <mem>, --controller-mem <mem>      memory to allocate towards K8S controller
+                                        (default: ${CONTROLLER_MEMORY_SIZE}, env: CONTROLLER_MEMORY_SIZE)
+  -w <mem>, --worker-mem <mem>          memory to allocate per K8S worker
+                                        (default: ${WORKER_MEMORY_SIZE}, env: WORKER_MEMORY_SIZE)
+  -C <semver>, --ceph-version <semver>  Ceph package version to use
+                                        (default: ${CEPH_VERSION}, env CEPH_VERSION)
 EOF
   exit 1
 }
@@ -123,9 +125,9 @@ docker pull "${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/ceph-config-helper:${
   -t "${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/ceph-config-helper:${OS_TAG}" \
   --build-arg KUBE_VERSION=v${K8S_VERSION} \
   --build-arg CEPH_KEY=https://download.ceph.com/keys/release.asc \
-  --build-arg CEPH_REPO=https://download.ceph.com/debian-octopus/ \
-  --build-arg CEPH_RELEASE=octopus \
-  --build-arg CEPH_RELEASE_TAG="15.2.8-1bionic" \
+  --build-arg CEPH_REPO=https://download.ceph.com/debian-${CEPH_VERSION}/ \
+  --build-arg CEPH_RELEASE=${CEPH_VERSION} \
+  --build-arg CEPH_RELEASE_TAG="${CEPH_VERSION}-1bionic" \
   -f "${OSH_IMG_LXD_LOCATION}/ceph-config-helper/Dockerfile.ubuntu_bionic" \
   "${OSH_IMG_LXD_LOCATION}/ceph-config-helper" \
 && docker push "${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/ceph-config-helper:${OS_TAG}")
@@ -135,20 +137,31 @@ docker pull "${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/libvirt:${OS_TAG}" ||
   --build-arg FROM=docker.io/ubuntu:focal \
   --build-arg UBUNTU_RELEASE=focal \
   --build-arg CEPH_KEY=https://download.ceph.com/keys/release.asc \
-  --build-arg CEPH_REPO=https://download.ceph.com/debian-octopus/ \
-  --build-arg CEPH_RELEASE=octopus \
-  --build-arg CEPH_RELEASE_TAG="15.2.8-1focal" \
+  --build-arg CEPH_REPO=https://download.ceph.com/debian-${CEPH_VERSION}/ \
+  --build-arg CEPH_RELEASE=${CEPH_VERSION} \
+  --build-arg CEPH_RELEASE_TAG="${CEPH_VERSION}-1focal" \
   -f "${OSH_IMG_LXD_LOCATION}/libvirt/Dockerfile.ubuntu_bionic" \
   "${OSH_IMG_LXD_LOCATION}/libvirt" \
 && docker push "${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/libvirt:${OS_TAG}")
 
 docker build --force-rm \
   -t "${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/loci-base:${OS_TAG}" \
-  --build-arg CEPH_URL="http://download.ceph.com/debian-octopus/" \
+  --build-arg CEPH_URL="http://download.ceph.com/debian-${CEPH_VERSION}/" \
   "${LOCI_LXD_LOCATION}/dockerfiles/${BASE_IMAGE}"
 
+#docker build --force-rm \
+#  -t "${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/requirements:${OS_TAG}" \
+#  --build-arg FROM="${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/loci-base:${OS_TAG}" \
+#  --build-arg PROJECT=requirements \
+#  --build-arg PYTHON3=yes \
+#  --build-arg PROJECT_REF="stable/${OS_VERSION}" \
+#  --build-arg PROJECT_RELEASE="${OS_VERSION}" \
+#  --build-arg PROFILES="requirements infra python3 apache nginx haproxy lvm ceph linuxbridge openvswitch tftp ipxe qemu libvirt" \
+#  --build-arg PIP_PACKAGES='psycopg2-binary uwsgi ${STABLE_VERSION_REQUIREMENTS[${OS_VERSION}]}' \
+#  "${LOCI_LXD_LOCATION}"
+
     #--build-arg PIP_PACKAGES='psycopg2-binary psycopg2cffi psycogreen pg8000<=1.16.5 uwsgi'
-for i in keystone glance cinder neutron nova placement horizon heat barbican octavia designate manila ironic magnum senlin; do
+for i in keystone glance cinder neutron nova placement horizon heat barbican octavia designate manila ironic magnum senlin trove; do
   docker pull "${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/\${i}:${OS_TAG}" || (docker build --force-rm \
     -t "${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/\${i}:${OS_TAG}" \
     --build-arg FROM="${LOCAL_REGISTRY_HOST}:${LOCAL_REGISTRY_PORT}/loci-base:${OS_TAG}" \
@@ -247,11 +260,12 @@ main(){
   : ${LXD_STORAGE_POOL:=default}
   : ${CLUSTER_NAME:=rookery}
   : ${NUM_WORKERS:=1}
-  : ${K8S_VERSION:=1.20.2}
+  : ${K8S_VERSION:=1.20.4}
   : ${OS_VERSION:=victoria}
   : ${BASE_IMAGE:=ubuntu_bionic}
   : ${CONTROLLER_MEMORY_SIZE:=2GiB}
   : ${WORKER_MEMORY_SIZE:=12GiB}
+  : ${CEPH_VERSION:=15.2.9}
   #NUM_VOLUMES="${NUM_VOLUMES:-2}"
 
   local SCRIPT_OP
@@ -298,6 +312,10 @@ main(){
         ;;
       -w | --worker-mem)
         WORKER_MEMORY_SIZE="${2}"
+        shift 2
+        ;;
+      -C | --ceph-version)
+        CEPH_VERSION="${2}"
         shift 2
         ;;
       *) usage;;

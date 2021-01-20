@@ -1,13 +1,14 @@
 {{- $helmTimeout := default 86400 (env "HELM_TIMEOUT") -}}
 
-{{- $namespaces := dict "monitoring" (default "monitoring" (env "NAMESPACES_MONITORING")) "network" (default "network" (env "NAMESPACES_NETWORK")) "serverless" (default "serverless" (env "NAMESPACES_SERVERLESS")) "serverlessFunctions" (default "serverless-functions" (env "NAMESPACES_SERVERLESS_FUNCTIONS")) "storage" (default "storage" (env "NAMESPACES_STORAGE")) -}}
+{{- $namespaces := dict "monitoring" (default "monitoring" (env "NAMESPACES_MONITORING")) "network" (default "network" (env "NAMESPACES_NETWORK")) "serverless" (default "serverless" (env "NAMESPACES_SERVERLESS")) "serverlessFunctions" (default "serverless-fn" (env "NAMESPACES_SERVERLESS_FUNCTIONS")) "serverlessBuild" (default "serverless-bld" (env "NAMESPACES_SERVERLESS_BUILD")) "storage" (default "storage" (env "NAMESPACES_STORAGE")) -}}
 {{- $releases := dict "certManager" (default "cert-manager" (env "RELEASES_CERT_MANAGER")) "harbor" (default "harbor" (env "RELEASES_HARBOR")) "istio" (dict "old" (default "istio" (env "RELEASES_ISTIO")) "init" (default "istio-init" (env "RELEASES_ISTIO_INIT")) "base" (default "istio-base" (env "RELEASES_ISTIO_BASE")) "control" (default "istio-control" (env "RELEASES_ISTIO_CONTROL")) "gateway" (dict "egress" (default "istio-egress" (env "RELEASES_ISTIO_GATEWAY_EGRESS")) "ingress" (default "istio-ingress" (env "RELEASES_ISTIO_GATEWAY_INGRESS"))) "policy" (default "istio-policy" (env "RELEASES_ISTIO_POLICY")) "telemetry" (dict "grafana" (default "istio-grafana" (env "RELEASES_ISTIO_TELEMETRY_GRAFANA")) "kiali" (default "istio-kiali" (env "RELEASES_ISTIO_TELEMETRY_KIALI")) "prometheusOperator" (default "istio-prometheus-operator" (env "RELEASES_ISTIO_TELEMETRY_PROMETHEUS_OPERATOR")) "tracing" (default "istio-tracing" (env "RELEASES_ISTIO_TELEMETRY_TRACING")))) "jaegerOperator" (default "jaeger-operator" (env "RELEASES_JAEGER_OPERATOR")) "kubeless" (default "kubeless" (env "RELEASES_KUBELESS")) "kubePromStack" (default "kube-prometheus-stack" (env "RELEASES_KUBE_PROMETHEUS_STACK")) "minio" (default "minio" (env "RELEASES_MINIO")) "openebs" (default "openebs" (env "RELEASES_OPENEBS")) "patroni" (default "patroni" (env "RELEASES_PATRONI")) "prometheusAdapter" (default "prometheus-adapter" (env "RELEASES_PROMETHEUS_ADAPTER")) "redis" (default "redis" (env "RELEASES_REDIS")) "thanos" (default "thanos" (env "RELEASES_THANOS")) -}}
-{{- $versions := dict "certManager" (default "1.1.0" (env "VERSIONS_CERT_MANAGER")) "harbor" (default "2.1.3" (env "VERSIONS_HARBOR")) "istio" (default "1.8.2" (env "VERSIONS_ISTIO")) "jaeger" (default "1.21.2" (env "VERSIONS_JAEGER")) "openebs" (default "2.5.0" (env "VERSIONS_OPENEBS")) "openebsNdm" (default "1.1.1" (env "VERSIONS_OPENEBS_NDM")) "prometheusAdapter" (default "0.8.2" (env "VERSIONS_PROMETHEUS_ADAPTER")) "thanos" (default "0.17.2" (env "VERSIONS_THANOS")) -}}
+{{- $versions := dict "certManager" (default "1.1.0" (env "VERSIONS_CERT_MANAGER")) "harbor" (default "2.2.0" (env "VERSIONS_HARBOR")) "istio" (default "1.9.1" (env "VERSIONS_ISTIO")) "jaeger" (default "1.21.3" (env "VERSIONS_JAEGER")) "openebs" (default "2.6.0" (env "VERSIONS_OPENEBS")) "openebsNdm" (default "1.2.0" (env "VERSIONS_OPENEBS_NDM")) "prometheusAdapter" (default "0.8.3" (env "VERSIONS_PROMETHEUS_ADAPTER")) "thanos" (default "0.18.0" (env "VERSIONS_THANOS")) -}}
 
-{{- $harbor := dict "adminPassword" (default "Harbor12345" (env "HARBOR_ADMIN_PASSWORD")) "coreHostname" (default "core.harbor.domain" (env "HARBOR_CORE_HOSTNAME")) "httpNodePort" (default "30002" (env "HARBOR_HTTP_NODEPORT")) "chartVersion" (default "1.5.3" (env "CHART_VERSIONS_HARBOR")) "db" (dict "core" (dict "name" (default "harbor_core" (env "HARBOR_DB_CORE_NAME")) "user" (default "harbor_core" (env "HARBOR_DB_CORE_USER")) "pass" (default "harbor_core" (env "HARBOR_DB_CORE_PASS"))) "clair" (dict "name" (default "harbor_clair" (env "HARBOR_DB_CLAIR_NAME")) "user" (default "harbor_clair" (env "HARBOR_DB_CLAIR_USER")) "pass" (default "harbor_clair" (env "HARBOR_DB_CLAIR_PASS"))) "notaryServer" (dict "name" (default "harbor_notary_server" (env "HARBOR_DB_NOTARY_SERVER_NAME")) "user" (default "harbor_notary_server" (env "HARBOR_DB_NOTARY_SERVER_USER")) "pass" (default "harbor_notary_server" (env "HARBOR_DB_NOTARY_SERVER_PASS"))) "notarySigner" (dict "name" (default "harbor_notary_signer" (env "HARBOR_DB_NOTARY_SIGNER_NAME")) "user" (default "harbor_notary_signer" (env "HARBOR_DB_NOTARY_SIGNER_USER")) "pass" (default "harbor_notary_signer" (env "HARBOR_DB_NOTARY_SIGNER_PASS")))) -}}
+{{- $harbor := dict "adminPassword" (default "Harbor12345" (env "HARBOR_ADMIN_PASSWORD")) "coreHostname" (default "core.harbor.domain" (env "HARBOR_CORE_HOSTNAME")) "httpNodePort" (default "30002" (env "HARBOR_HTTP_NODEPORT")) "chartVersion" (default "1.6.0" (env "CHART_VERSIONS_HARBOR")) "db" (dict "core" (dict "name" (default "harbor_core" (env "HARBOR_DB_CORE_NAME")) "user" (default "harbor_core" (env "HARBOR_DB_CORE_USER")) "pass" (default "harbor_core" (env "HARBOR_DB_CORE_PASS"))) "notaryServer" (dict "name" (default "harbor_notary_server" (env "HARBOR_DB_NOTARY_SERVER_NAME")) "user" (default "harbor_notary_server" (env "HARBOR_DB_NOTARY_SERVER_USER")) "pass" (default "harbor_notary_server" (env "HARBOR_DB_NOTARY_SERVER_PASS"))) "notarySigner" (dict "name" (default "harbor_notary_signer" (env "HARBOR_DB_NOTARY_SIGNER_NAME")) "user" (default "harbor_notary_signer" (env "HARBOR_DB_NOTARY_SIGNER_USER")) "pass" (default "harbor_notary_signer" (env "HARBOR_DB_NOTARY_SIGNER_PASS")))) -}}
 
 {{- $istioManifestBase := "./charts/istio/manifests" -}}
 
+{{- $kong := dict "db" (dict "user" (default "kong" (env "KONG_DB_USER")) "pass" (default "kong" (env "KONG_DB_PASS")) "name" (default "kong" (env "KONG_DB_NAME"))) }}
 {{- $kubePromStackChartVersion := "9.4.10" -}}
 
 {{- $minio := dict "accessKey" (default "AKIAIOSFODNN7EXAMPLE" (env "MINIO_ACCESS_KEY")) "secretKey" (default "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" (env "MINIO_SECRET_KEY")) "servicePort" (default 9000 (env "MINIO_SVC_PORT")) "defaultBucket" (default "minio-bucket" (env "MINIO_DEFAULT_BUCKET")) "chartVersion" (default "8.0.0" (env "MINIO_VERSION")) -}}
@@ -21,51 +22,72 @@
 {{- $thanosObjstoreConfig := dict "secret" (default "thanos-objstore-config" (env "THANOS_OBJSTORE_CONFIG_SECRET")) "filename" (default "object-store.yaml" (env "THANOS_OBJSTORE_CONFIG_FILENAME")) -}}
 {{- $thanosSidecarMTLSSecret := default "thanos-sidecar-mtls" (env "THANOS_SIDECAR_MTLS_SECRET") -}}
 
+{{- $enables := dict }}
+{{- range $i := list "monitoring" "network" "serverless" "storage" "minio" "openebs" }}
+  {{- $_ := set $enables $i (not (empty (env (printf "ENABLE_%s" (upper $i))))) }}
+{{- end }}
+
 repositories:
 - name: stable
   url: "https://charts.helm.sh/stable"
 - name: incubator
   url: "https://charts.helm.sh/incubator"
+- name: jetstack  # cert-manager
+  url: "https://charts.jetstack.io"
 - name: banzaicloud  # thanos, src: https://github.com/banzaicloud/banzai-charts
   url: "https://kubernetes-charts.banzaicloud.com"
-- name: jaegertracing  # src: https://github.com/jaegertracing/helm-charts
-  url: "https://jaegertracing.github.io/helm-charts"
+- name: rancher
+  url: "https://releases.rancher.com/server-charts/latest"
+
+## storage
 - name: openebs
   url: "https://openebs.github.io/charts"
+- name: rook
+  url: "https://charts.rook.io/release"
+- name: minio  # https://github.com/minio/charts
+  url: "https://helm.min.io"
+
+## datastores
+- name: grafana  # https://github.com/grafana/helm-charts
+  url: "https://grafana.github.io/helm-charts"
+- name: grafana-loki  # https://github.com/grafana/loki/tree/master/production/helm
+  url: "https://grafana.github.io/loki/charts"
+- name: prometheus-community  # https://github.com/prometheus-community/helm-charts
+  url: "https://prometheus-community.github.io/helm-charts"
+- name: dandy-developer  # https://github.com/DandyDeveloper/charts
+  url: "https://dandydeveloper.github.io/charts"
 - name: harbor  # src: https://github.com/goharbor/harbor-helm
   url: "https://helm.goharbor.io"
+- name: yugabyte
+  url: "https://charts.yugabyte.com"
+## LOL SSPL-LICENSED SOFTWARE, DO NOT TOUCH
+#- name: elastic  # https://github.com/elastic/helm-charts
+#  url: "https://helm.elastic.co"
+
+## networking / service meshes
+{{- if semverCompare "<1.6" $versions.istio }}
+- name: istio
+  url: "https://storage.googleapis.com/istio-release/releases/{{ $versions.istio }}/charts"
+{{- end }}
+- name: jaegertracing  # src: https://github.com/jaegertracing/helm-charts
+  url: "https://jaegertracing.github.io/helm-charts"
+#- name: kiali  # https://github.com/kiali/helm-charts
+#  url: "https://kiali.org/helm-charts"
+
+## ingresses
 # ref: https://github.com/nginxinc/kubernetes-ingress/blob/master/docs/nginx-ingress-controllers.md#differences-between-nginxinckubernetes-ingress-and-kubernetesingress-nginx-ingress-controllers
 - name: nginx  # src: https://github.com/nginxinc/kubernetes-ingress/tree/master/deployments/helm-chart
   url: "https://helm.nginx.com/stable"
 # ref: https://kubernetes.github.io/ingress-nginx/user-guide/
 - name: kubernetes-nginx  # src: https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx
   url: https://kubernetes.github.io/ingress-nginx
-- name: jetstack  # cert-manager
-  url: "https://charts.jetstack.io"
-- name: rancher
-  url: "https://releases.rancher.com/server-charts/latest"
-- name: rook
-  url: "https://charts.rook.io/release"
-- name: yugabyte
-  url: "https://charts.yugabyte.com"
-{{- if semverCompare "<1.6" $versions.istio }}
-- name: istio
-  url: "https://storage.googleapis.com/istio-release/releases/{{ $versions.istio }}/charts"
-{{- end }}
-- name: grafana  # https://github.com/grafana/helm-charts
-  url: "https://grafana.github.io/helm-charts"
-- name: grafana-loki  # https://github.com/grafana/loki/tree/master/production/helm
-  url: "https://grafana.github.io/loki/charts"
-- name: elastic  # https://github.com/elastic/helm-charts
-  url: "https://helm.elastic.co"
-- name: prometheus-community  # https://github.com/prometheus-community/helm-charts
-  url: "https://prometheus-community.github.io/helm-charts"
-- name: dandy-developer  # https://github.com/DandyDeveloper/charts
-  url: "https://dandydeveloper.github.io/charts"
-- name: minio  # https://github.com/minio/charts
-  url: "https://helm.min.io"
-#- name: kiali  # https://github.com/kiali/helm-charts
-#  url: "https://kiali.org/helm-charts"
+- name: kong
+  url: https://charts.konghq.com
+
+## serverless
+- name: openfaas  # https://github.com/openfaas/faas-netes/tree/master/chart
+  url: "https://openfaas.github.io/faas-netes"
+# https://github.com/fnproject/fn ?
 
 helmDefaults:
   wait: true
@@ -91,8 +113,10 @@ templates:
         prometheusNamespace: {{ $namespaces.network }}
         policyNamespace: {{ $namespaces.network }}
         configRootNamespace: {{ $namespaces.network }}
+{{- if semverCompare "<1.9" $versions.istio }}
         meshExpansion:
           enabled: true
+{{- end }}
       control: &istioControl
         disablePolicyChecks: false
         mtls:
@@ -200,6 +224,7 @@ releases:
 - name: {{ $releases.jaegerOperator }}
   namespace: {{ $namespaces.network }}
   chart: jaegertracing/jaeger-operator
+  installed: {{ $enables.network }}
   version: 2.18.0
   values:
   - fullnameOverride: {{ $releases.jaegerOperator | quote }}
@@ -218,18 +243,22 @@ releases:
 - name: {{ $releases.istio.init }}
   namespace: {{ $namespaces.network }}
   chart: istio/istio-init
+  installed: {{ $enables.network }}
   values:
   - *istioOldCertManager
 - name: {{ $releases.istio.old }}
   namespace: {{ $namespaces.network }}
   chart: istio/istio
+  installed: {{ $enables.network }}
   needs:
   - {{ $namespaces.network }}/{{ $releases.istio.init }}
   - {{ $namespaces.network }}/{{ $releases.jaegerOperator }}
+  {{- if $enables.network }}
   hooks:
   - events: ["presync"]
     command: "/bin/sh"
     args: ["-xec", "kubectl -n {{ $namespaces.network }} wait --for condition=complete --timeout {{ $helmTimeout }}s job --all"]
+  {{- end }}
   values:
   - fullnameOverride: {{ $releases.istio.old | quote }}
     global:
@@ -261,8 +290,11 @@ releases:
 - name: {{ $releases.istio.base }}
   namespace: {{ $namespaces.network }}
   chart: {{ $istioManifestBase }}/charts/base
+  installed: {{ $enables.network }}
   values:
+  {{- if semverCompare "<1.9" $versions.istio }}
   - {{ $istioManifestBase }}/charts/global.yaml
+  {{- end }}
   - global:
       <<: *istioGlobal
     base:  # helm2
@@ -270,10 +302,13 @@ releases:
 - name: {{ $releases.istio.control }}
   namespace: {{ $namespaces.network }}
   chart: {{ $istioManifestBase }}/charts/istio-control/istio-discovery
+  installed: {{ $enables.network }}
   needs:
   - {{ $namespaces.network }}/{{ $releases.istio.base }}
   values:
+  {{- if semverCompare "<1.9" $versions.istio }}
   - {{ $istioManifestBase }}/charts/global.yaml
+  {{- end }}
   - global:
       <<: *istioGlobal
       <<: *istioControl
@@ -282,10 +317,13 @@ releases:
 - name: {{ $releases.istio.gateway.egress }}
   namespace: {{ $namespaces.network }}
   chart: {{ $istioManifestBase }}/charts/gateways/istio-egress
+  installed: {{ $enables.network }}
   needs:
   - {{ $namespaces.network }}/{{ $releases.istio.control }}
   values:
+  {{- if semverCompare "<1.9" $versions.istio }}
   - {{ $istioManifestBase }}/charts/global.yaml
+  {{- end }}
   - global:
       <<: *istioGlobal
     gateways:
@@ -294,36 +332,44 @@ releases:
 - name: {{ $releases.istio.gateway.ingress }}
   namespace: {{ $namespaces.network }}
   chart: {{ $istioManifestBase }}/charts/gateways/istio-ingress
+  installed: {{ $enables.network }}
   needs:
   - {{ $namespaces.network }}/{{ $releases.istio.control }}
   values:
+  {{- if semverCompare "<1.9" $versions.istio }}
   - {{ $istioManifestBase }}/charts/global.yaml
+  {{- end }}
   - global:
       <<: *istioGlobal
     gateways:
       istio-ingressgateway:
         <<: *istioIngress
-# need to add supplement configuration for Prometheus and Kiali from {{ $istioManifestBase }}/addons
   {{- if semverCompare "<1.8" $versions.istio }}
 - name: {{ $releases.istio.policy }}
   namespace: {{ $namespaces.network }}
   chart: {{ $istioManifestBase }}/charts/istio-policy
+  installed: {{ $enables.network }}
   needs:
   - {{ $namespaces.network }}/{{ $releases.istio.control }}
   values:
+    {{- if semverCompare "<1.9" $versions.istio }}
   - {{ $istioManifestBase }}/charts/global.yaml
+    {{- end }}
   - global:
       <<: *istioGlobal
     <<: *istioMixer
   {{- end }}
 - name: {{ $releases.istio.telemetry.grafana }}
   namespace: {{ $namespaces.network }}
+  installed: {{ $enables.network }}
   {{- if semverCompare "<1.8" $versions.istio }}
   chart: {{ $istioManifestBase }}/charts/istio-telemetry/grafana
   needs:
   - {{ $namespaces.network }}/{{ $releases.istio.control }}
   values:
+    {{- if semverCompare "<1.9" $versions.istio }}
   - {{ $istioManifestBase }}/charts/global.yaml
+    {{- end }}
   - global:
       <<: *istioGlobal
   {{- else }}
@@ -331,6 +377,7 @@ releases:
   version: 5.8.16
   values:
   - {{ $istioManifestBase }}/addons/values-grafana.yaml
+    {{- if $enables.network }}
   hooks:
   - events: ["presync"]
     command: "/bin/sh"
@@ -345,20 +392,24 @@ releases:
         --from-file=istio-workload-dashboard.json="{{ $istioManifestBase }}/addons/dashboards/istio-workload-dashboard.json" \
         --from-file=istio-service-dashboard.json="{{ $istioManifestBase }}/addons/dashboards/istio-service-dashboard.json" \
         --from-file=istio-mesh-dashboard.json="{{ $istioManifestBase }}/addons/dashboards/istio-mesh-dashboard.json"
+    {{- end }}
   {{- end }}
 - name: {{ $releases.istio.telemetry.kiali }}
   namespace: {{ $namespaces.network }}
+  installed: {{ $enables.network }}
   {{- if semverCompare "<1.8" $versions.istio }}
   chart: {{ $istioManifestBase }}/charts/istio-telemetry/kiali
   needs:
   - {{ $namespaces.network }}/{{ $releases.istio.control }}
   values:
+    {{- if semverCompare "<1.9" $versions.istio }}
   - {{ $istioManifestBase }}/charts/global.yaml
+    {{- end }}
   - global:
       <<: *istioGlobal
     <<: *istioKiali
   {{- else }}
-  chart: ./charts/kiali-server-1.27.0
+  chart: ./charts/kiali-server-1.29.0
   values:
   - {{ $istioManifestBase }}/addons/values-kiali.yaml
   {{- end }}
@@ -367,6 +418,7 @@ releases:
 # https://github.com/istio/installer/pull/71
 - name: {{ $releases.istio.telemetry.prometheusOperator }}
   namespace: {{ $namespaces.network }}
+  installed: {{ and $enables.network $enables.monitoring }}
 {{- if semverCompare "<1.8" $versions.istio }}
   chart: {{ $istioManifestBase }}/charts/istio-telemetry/prometheusOperator
   needs:
@@ -377,7 +429,9 @@ releases:
   - {{ $namespaces.network }}/{{ $releases.istio.control }}
   {{- end }}
   values:
+  {{- if semverCompare "<1.9" $versions.istio }}
   - {{ $istioManifestBase }}/charts/global.yaml
+  {{- end }}
   - global:
       <<: *istioGlobal
 {{- else }}
@@ -387,10 +441,11 @@ releases:
   - {{ $istioManifestBase }}/addons/values-prometheus.yaml
 {{- end }}
 
-# storage components
+## storage components
 - name: {{ $releases.openebs }}
   namespace: {{ $namespaces.storage }}
   chart: openebs/openebs
+  installed: {{ $enables.storage }}
   values:  # ref: https://openebs.github.io/charts/openebs-lite-helm-values.yaml
   - fullnameOverride: {{ $releases.openebs | quote }}
     #image:  # hopefully a temporary state of affairs
@@ -440,6 +495,7 @@ releases:
       filters:
         excludePaths: "/dev/sd,/dev/vd,fd0,sr0,/dev/ram,/dev/dm-,/dev/md,/dev/zram{{ $openebsOmitLoopDevs }}"
         includePaths: "/dev/loop"
+{{- if $enables.storage }}
   hooks:
   - events: ["postsync"]
     command: "/bin/sh"
@@ -491,10 +547,12 @@ releases:
       #      - name: StorageType
       #        value: "device"
       EOF
+{{- end }}
 - name: {{ $releases.minio }}
   namespace: {{ $namespaces.storage }}
   chart: minio/minio
   version: {{ $minio.chartVersion }}
+  installed: {{ and $enables.storage $enables.minio }}
   needs:
   - {{ $namespaces.storage }}/{{ $releases.openebs }}
   values:
@@ -512,6 +570,7 @@ releases:
     resources:
       requests:
         memory: 256Mi
+{{- if and $enables.storage $enables.minio }}
   hooks:
   - events: ["postsync"]
     command: "/bin/sh"
@@ -542,9 +601,11 @@ releases:
       until kubectl -n {{ $namespaces.storage }} wait --for condition=available deploy ${MC_NAME}; do sleep 1; done 2>/dev/null
       kubectl -n {{ $namespaces.storage }} exec $(kubectl -n {{ $namespaces.storage }} get pods -o jsonpath="{.items[?(@.metadata.labels.app==\"${MC_NAME}\")].metadata.name}" | awk '{print $1}') -- /bin/sh -xc "mc config host add minio http://{{ $releases.minio }}.{{ $namespaces.storage }}.svc:{{ $minio.servicePort }} {{ $minio.accessKey }} {{ $minio.secretKey }}"
       echo "MinIO is available under http://{{ $releases.minio }}.{{ $namespaces.storage }}.svc:{{ $minio.servicePort }} with access key \"{{ $minio.accessKey }}\", secret key \"{{ $minio.secretKey }}\" and default bucket \"{{ $minio.defaultBucket }}\"."
+{{- end }}
 - name: {{ $releases.patroni }}
   namespace: {{ $namespaces.storage }}
   chart: ./charts/zer0def/incubator/patroni
+  installed: {{ $enables.storage }}
   needs:
   - {{ $namespaces.storage }}/{{ $releases.openebs }}
   - {{ $namespaces.network }}/{{ $releases.certManager }}
@@ -559,7 +620,7 @@ releases:
       #repository: registry.opensource.zalan.do/acid/spilo-12
       #tag: 1.6-p5
       repository: registry.opensource.zalan.do/acid/spilo-13
-      tag: 2.0-p2
+      tag: 2.0-p5
     pgbouncer:
       replicaCount: 1
       tls:
@@ -580,11 +641,6 @@ releases:
     - name: {{ $harbor.db.core.name | quote }}
       user: {{ $harbor.db.core.user | quote }}
       pass: {{ $harbor.db.core.pass | quote }}
-    - name: {{ $harbor.db.clair.name | quote }}
-      user: {{ $harbor.db.core.user | quote }}
-      pass: {{ $harbor.db.core.pass | quote }}
-      #user: {{ $harbor.db.clair.user | quote }}
-      #pass: {{ $harbor.db.clair.pass | quote }}
     - name: {{ $harbor.db.notaryServer.name | quote }}
       user: {{ $harbor.db.core.user | quote }}
       pass: {{ $harbor.db.core.pass | quote }}
@@ -595,21 +651,29 @@ releases:
       pass: {{ $harbor.db.core.pass | quote }}
       #user: {{ $harbor.db.notarySigner.user | quote }}
       #pass: {{ $harbor.db.notarySigner.pass | quote }}
+    - name: {{ $kong.db.name | quote }}
+      user: {{ $kong.db.user | quote }}
+      pass: {{ $kong.db.pass | quote }}
     env:
       ALLOW_NOSSL: "true"
     spiloConfiguration:
       bootstrap:
         dcs:
           synchronous_mode: true
-          synchronous_mode_count: 1
           #synchronous_mode_strict: true
+          synchronous_node_count: 1
         initdb:
         - data-checksums
         - locale: en_US.UTF-8
         - encoding: UTF-8
+      postgresql:
+        parameters:
+          log_destination: stderr
+          logging_collector: "off"
 - name: {{ $releases.redis }}
   namespace: {{ $namespaces.storage }}
   chart: dandy-developer/redis-ha
+  installed: {{ $enables.storage }}
   needs:
   - {{ $namespaces.storage }}/{{ $releases.openebs }}
   values:
@@ -644,6 +708,8 @@ releases:
   namespace: {{ $namespaces.storage }}
   chart: harbor/harbor
   version: {{ $harbor.chartVersion }}
+  #installed: {{ and $enables.storage $enables.minio }}
+  installed: false
   needs:
   - {{ $namespaces.storage }}/{{ $releases.minio }}
   - {{ $namespaces.storage }}/{{ $releases.patroni }}
@@ -686,7 +752,6 @@ releases:
         username: {{ $harbor.db.core.user | quote }}
         password: {{ $harbor.db.core.pass | quote }}
         coreDatabase: {{ $harbor.db.core.name | quote }}
-        clairDatabase: {{ $harbor.db.clair.name | quote }}
         notaryServerDatabase: {{ $harbor.db.notaryServer.name | quote }}
         notarySignerDatabase: {{ $harbor.db.notarySigner.name | quote }}
         #sslmode: require
@@ -704,7 +769,10 @@ releases:
       <<: *harborVersion
     jobservice:
       <<: *harborVersion
-      jobLogger: database
+      jobLogger:
+      - database
+      #- file
+      #- stdout
     registry:
       registry:
         <<: *harborVersion
@@ -712,11 +780,6 @@ releases:
         <<: *harborVersion
     chartmuseum:
       <<: *harborVersion
-    clair:
-      clair:
-        <<: *harborVersion
-      adapter:
-        <<: *harborVersion
     trivy:
       <<: *harborVersion
     notary:
@@ -725,10 +788,11 @@ releases:
       signer:
         <<: *harborVersion
 
-# monitoring
+## monitoring
 - name: {{ $releases.thanos }}
   namespace: {{ $namespaces.monitoring }}
   chart: banzaicloud/thanos
+  installed: {{ and $enables.monitoring $enables.minio }}
   needs:
   - {{ $namespaces.storage }}/{{ $releases.minio }}
   values:
@@ -757,6 +821,7 @@ releases:
   namespace: {{ $namespaces.monitoring }}
   chart: prometheus-community/kube-prometheus-stack
   version: {{ $kubePromStackChartVersion }}
+  installed: {{ $enables.monitoring }}
   needs:
   - {{ $namespaces.monitoring }}/{{ $releases.thanos }}
   values:
@@ -800,9 +865,13 @@ releases:
         url: "http://thanos-query-http.{{ $namespaces.monitoring }}.svc:10902/"
         access: proxy
         isDefault: true
+# doc: (use autoscaling/v2beta[12] HorizontalPodAutoscaler)
+# - ref: https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/config.md
+# - tut: https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/config-walkthrough.md
 - name: {{ $releases.prometheusAdapter }}
   namespace: {{ $namespaces.monitoring }}
   chart: prometheus-community/prometheus-adapter
+  installed: {{ $enables.monitoring }}
   needs:
   - {{ $namespaces.monitoring }}/{{ $releases.kubePromStack }}
   values:
@@ -811,15 +880,17 @@ releases:
       tag: v{{ $versions.prometheusAdapter }}
     prometheus:
       url: "http://{{ $releases.kubePromStack }}-prometheus.{{ $namespaces.monitoring }}.svc"
-    # https://github.com/DirectXMan12/k8s-prometheus-adapter/blob/master/docs/config.md
-    # use autoscaling/v2beta[12] HorizontalPodAutoscaler
     rules: {}
 
-# serverless
+## serverless
+# doc:
+# - https://kubeless.io/docs/
 - name: {{ $releases.kubeless }}
   namespace: {{ $namespaces.serverless }}
   # should be installing upstream incubator/kubeless chart, but it's shit
   chart: ./charts/zer0def/incubator/kubeless
+  #installed: {{ $enables.serverless }}
+  installed: false
   values:
   - nameOverride: {{ $releases.kubeless | quote }}
     rbac:
@@ -845,3 +916,117 @@ releases:
       enabled: true
       service:
         type: ClusterIP
+
+# doc:
+# - https://docs.openfaas.com/
+# - https://github.com/openfaas/faas-netes/blob/master/chart/openfaas/README.md
+- name: openfaas
+  namespace: {{ $namespaces.serverless }}
+  chart: openfaas/openfaas
+  version: 7.0.4
+  installed: {{ $enables.serverless }}
+  #installed: false
+{{- if $enables.serverless }}
+  hooks:
+  - events: ["presync"]
+    command: "/bin/sh"
+    args:
+    - "-xec"
+    - |
+      kubectl get {{ $namespaces.serverlessFunctions }} || kubectl create ns {{ $namespaces.serverlessFunctions }}
+      kubectl annotate ns {{ $namespaces.serverlessFunctions }} openfaas="1"
+  - events: ["postsync"]
+    command: "/bin/sh"
+    args:
+    - "-xec"
+    - |
+  {{- if $enables.network }}
+      kubectl label ns {{ $namespaces.serverlessFunctions }} istio-injection=enabled
+  {{- end }}
+  {{- if $enables.serverless }}
+      kubectl apply -f- <<EOF
+      kind: Profile
+      apiVersion: openfaas.com/v1
+      metadata:
+        name: runc
+        namespace: {{ $namespaces.serverlessFunctions }}
+      spec:
+        runtimeClassName: runc
+      ---
+      kind: Profile
+      apiVersion: openfaas.com/v1
+      metadata:
+        name: kata-qemu
+        namespace: {{ $namespaces.serverlessFunctions }}
+      spec:
+        runtimeClassName: kata-qemu
+      ---
+      kind: Profile
+      apiVersion: openfaas.com/v1
+      metadata:
+        name: kata-fc
+        namespace: {{ $namespaces.serverlessFunctions }}
+      spec:
+        runtimeClassName: kata-fc
+      ---
+      kind: Profile
+      apiVersion: openfaas.com/v1
+      metadata:
+        name: kata-clh
+        namespace: {{ $namespaces.serverlessFunctions }}
+      spec:
+        runtimeClassName: kata-clh
+      EOF
+  {{- end }}
+{{- end }}
+  values:
+  - functionNamespace: {{ $namespaces.serverlessFunctions }}
+    clusterRole: true
+    openfaasPRO: false
+    generateBasicAuth: true
+    prometheus:
+      create: false
+    alertmanager:
+      create: false
+{{- if $enables.network }}
+    #basic_auth: true
+    #exposeServices: false
+    #faasnetes:
+    #  httpProbe: false
+    #gateway:
+    #  directFunctions: true
+    #httpProbe: false
+    #istio:
+    #  mtls: true
+{{- end }}
+
+# ref: https://github.com/fission/fission/tree/master/charts
+- name: fission
+  namespace: {{ $namespaces.serverless }}
+  #chart: https://github.com/fission/fission/releases/download/1.11.2/fission-all-1.11.2.tgz
+  chart: https://github.com/fission/fission/releases/download/1.11.2/fission-core-1.11.2.tgz
+  #installed: {{ $enables.serverless }}
+  installed: false
+  values:
+  - functionNamespace: {{ $namespaces.serverlessFunctions }}
+    builderNamespace: {{ $namespaces.serverlessBuild }}
+
+- name: kong
+  namespace: {{ $namespaces.network }}
+  chart: kong/kong
+  installed: false
+  needs:
+  - {{ $namespaces.storage }}/{{ $releases.patroni }}
+  values:
+  - env:
+      database: postgres
+      pg_host: {{ $releases.patroni }}.{{ $namespaces.storage }}.svc
+      pg_user: {{ $kong.db.user }}
+      pg_password: {{ $kong.db.pass }}
+      pg_database: {{ $kong.db.name }}
+      #pg_ssl: "on"
+      #pg_ssl_verify: "on"
+    image:
+      tag: alpine
+    #ingressController:
+    #  installCRDs: false

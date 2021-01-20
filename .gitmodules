@@ -8,7 +8,7 @@
 [submodule "istio"]
 	path = charts/istio
 	url = https://github.com/istio/istio
-	branch = release-1.8
+	branch = release-1.9
 [submodule "docker-registry-proxy"]
 	path = images/docker-registry-proxy
 	url = https://github.com/rpardini/docker-registry-proxy

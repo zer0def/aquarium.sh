@@ -12,7 +12,6 @@ DEFAULT_PROXY_REGISTRIES=(
   ghcr.io k8s.gcr.io gcr.io quay.io "registry.opensource.zalan.do"
 )
 
-HELMFILE_ARGS=()
 KUBE_NOPROXY_SETTING=(
   '.cluster.local' '.svc'
 #  '192.168.0.0/16' '172.16.0.0/12' '10.0.0.0/8'
@@ -20,11 +19,7 @@ KUBE_NOPROXY_SETTING=(
 
 K3D_OPTS=()
 KUBEDEE_OPTS=()
-MOUNTS_ALL=()
-LIB_MOUNTS_ALL=()
 RESTART_CRIO=1
-KATA_ROOT="${KATA_ROOT:-/usr}"
-KATA_SYSTEM_BINARIES=1
 MYDIR="$(dirname "$(readlink -f "${0}")")"
 
 string_join() { local IFS="$1"; shift; echo "$*"; }
@@ -57,46 +52,8 @@ create_volumes(){
   done
 }
 
-kata::common(){
-  local KATA_PATH="${PATH}" VIRTIOFSD_MOUNT='/usr/lib/qemu' QEMU_SHARE='/usr/share/qemu' KATA_LIB='/usr/lib/kata-containers'
-  if [ "${KATA_ROOT}" != "/usr" ]; then
-    KATA_PATH="${KATA_ROOT}/bin:${PATH}"  # add condition based on KATA_SYSTEM_BINARIES
-    KATA_LIB="${KATA_ROOT}/libexec/kata-containers"
-    VIRTIOFSD_MOUNT="${KATA_ROOT}/libexec/kata-qemu"
-    QEMU_SHARE="${KATA_ROOT}/share/kata-qemu/qemu"
-  fi ||:
-  CLH_HOST_BIN="$(PATH="${KATA_PATH}" command -v cloud-hypervisor-static || PATH="${KATA_PATH}" command -v cloud-hypervisor)" ||:
-  [ -n "${CLH_HOST_BIN}" ] && MOUNTS_ALL+=("$(readlink -f "${CLH_HOST_BIN}"):/usr/local/bin/cloud-hypervisor") ||:
-  MOUNTS_ALL+=(
-    "${KATA_LIB}:/usr/local/lib/kata-containers"
-    "${KATA_ROOT}/share/kata-containers:/usr/local/share/kata-containers"
-    "${QEMU_SHARE}:${QEMU_SHARE}"
-    "${VIRTIOFSD_MOUNT}:/usr/local/lib/qemu"
-    "${MYDIR}/utils/kata/config:/usr/local/share/defaults/kata-containers"
-    "${MYDIR}/utils/kata/config:/opt/kata/share/defaults/kata-containers"
-  )
-  #for i in /dev/kvm /dev/net/tun /dev/vhost-net /dev/vhost-scsi /dev/vhost-vsock /dev/vsock; do MOUNTS_ALL+=("${i}:${i}"); done
-  for i in $(PATH="${KATA_PATH}" command -v containerd-shim-kata-v2 kata-monitor kata-proxy kata-shim kata-runtime qemu-system-x86_64 qemu-virtiofs-system-x86_64 virtiofsd virtiofsd-dax firecracker jailer); do
-    MOUNTS_ALL+=("$(readlink -f "${i}"):/usr/local/bin/${i##*/}")
-    # find libraries for dynamic linking
-    for j in $(ldd "${i}" 2>/dev/null | awk '/ => / {print $1}'); do
-      local _awk_lib_name="$(echo "${j##*/}" | sed -e 's/\+/\\+/g')"
-      [ -z "${j##*/}" ] && continue
-      local _lib_host_path="$(ldconfig -p | awk "/${_awk_lib_name} \(libc6,x86-64.*) => / {print \$NF}")"
-      LIB_MOUNTS_ALL+=("${_lib_host_path}")
-    done
-  done
-}
-
 # common functions start
-kata_pre::k3d(){
-  K3D_OPTS+=(
-    '-e' 'LD_LIBRARY_PATH=/lib'
-    '-v' '/usr/lib/ld-linux-x86-64.so.2:/lib64/ld-linux-x86-64.so.2'
-  )
-  for i in "${MOUNTS_ALL[@]}"; do K3D_OPTS+=('-v' "${i}"); done
-  for i in $(printf "%s\n" "${LIB_MOUNTS_ALL[@]}" | sort -u); do K3D_OPTS+=('-v' "${i}:/lib/${i##*/}"); done
-
+kata_pre::k3d(){  # containerd config reference… of sorts
   for i in qemu fc clh; do
     # https://github.com/kata-containers/documentation/blob/master/how-to/containerd-kata.md
     # https://github.com/kata-containers/packaging/blob/master/kata-deploy/scripts/kata-deploy.sh
@@ -287,14 +244,12 @@ EOF
 #EOF
 #  done
 
-  [ "${INSTALL_KATA}" -eq 0 ] && kata::common && kata_pre::k3d
   [ "$(docker info -f '{{.Driver}}')" = "zfs" ] \
     && ZFS_DATASET="$(docker info -f '{{range $a := .DriverStatus}}{{if eq (index $a 0) "Parent Dataset"}}{{(index $a 1)}}{{end}}{{end}}')" \
     && check_zfs && create_volumes ||:
 
   echo "${DOCKER_ROOT_FS}" | grep -E '^(btr|tmp)fs$' && create_volumes ||:
 
-  #K3D_OPTS+=($(printf "%s\n" "${K3D_LIB_MOUNTS_ALL[@]}" | sort -u))
   # enable RuntimeClass admission controller?: https://kubernetes.io/docs/concepts/containers/runtime-class/
   k3d c -t 0 \
     -n "${CLUSTER_NAME}" \
@@ -332,33 +287,25 @@ launch_cluster::kubedee(){
 
   # crio.conf `storage_driver` value might need parameterization
   # ref: https://github.com/containers/storage/blob/master/docs/containers-storage.conf.5.md#storage-table
-  "${MYDIR}/kubedee/kubedee" --kubernetes-version "v${RUNTIME_VERSIONS[kubedee]}" --num-worker "${NUM_WORKERS}" --storage-pool "${LXD_STORAGE_POOL}" ${KUBEDEE_OPTS[@]} up "${CLUSTER_NAME}"
+  "${MYDIR}/kubedee/kubedee" \
+    --apiserver-extra-hostnames "kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster.local" \
+    --kubernetes-version "v${RUNTIME_VERSIONS[kubedee]}" \
+    --num-worker "${NUM_WORKERS}" \
+    --storage-pool "${LXD_STORAGE_POOL}" \
+    ${KUBEDEE_OPTS[@]} up "${CLUSTER_NAME}"
   $("${MYDIR}/kubedee/kubedee" kubectl-env "${CLUSTER_NAME}")
 
   until kubectl -n kube-system wait --for condition=ready pod -l app=flannel,tier=node; do sleep 1; done 2>/dev/null ||:
   until kubectl -n kube-system wait --for condition=ready pod -l k8s-app=kube-dns; do sleep 1; done 2>/dev/null ||:
 
-  [ "${INSTALL_KATA}" -eq 0 ] && kata::common \
-  && for i in $(lxc list -cn --format csv | grep -E "^kubedee-${CLUSTER_NAME}-" | grep -Ev '.*-etcd$'); do
-    for j in /dev/kvm /dev/net/tun /dev/vhost-net /dev/vhost-scsi /dev/vhost-vsock /dev/vsock; do
-      lxc config device add "${i}" "${j//\//}" unix-char path="${j}"
-    done
-    for j in qemu fc clh; do
-      lxc config device add "${i}" "config-${j}" disk source="${MYDIR}/utils/kata/shims/containerd-shim-kata-${j}-${SHIM_VERSION}" path="/usr/local/bin/containerd-shim-kata-${j}-${SHIM_VERSION}"
-    done
-    for j in "${MOUNTS_ALL[@]}"; do
-      lxc config device add "${i}" "$(uuidgen)" disk source="${j%:*}" path="${j##*:}"
-    done
-    for j in $(printf "%s\n" "${LIB_MOUNTS_ALL[@]}" | sort -u); do
-      lxc config device add "${i}" "$(uuidgen)" disk source="${j}" path="/usr/lib64/${j##*/}"
-    done
-    RUNTIMES_ROOT=/usr/local envsubst <"${MYDIR}/utils/manifests/crio-runtime-override.conf.tpl" >"${TMP_CRIO_CONF}"
-    lxc file push -p "${TMP_CRIO_CONF}" "${i}/etc/crio/crio.conf.d/00-runtimes.conf"
+  for i in $(lxc list -cn --format csv | grep -E "^kubedee-${CLUSTER_NAME}-" | grep -Ev '.*-etcd$'); do
+    #RUNTIMES_ROOT=/opt/kata envsubst <"${MYDIR}/utils/manifests/crio-runtime-override.conf.tpl" >"${TMP_CRIO_CONF}"
+    #lxc file push -p "${TMP_CRIO_CONF}" "${i}/etc/crio/crio.conf.d/00-runtimes.conf"
 
     # might want to do this more persistently
     lxc exec "${i}" -- /bin/sh -c 'mkdir -p /run/kata-containers/shared/sandboxes; mount --bind --make-rshared /run/kata-containers/shared/sandboxes /run/kata-containers/shared/sandboxes'
     RESTART_CRIO=0
-  done ||:
+  done
 
   launch_cluster_post
 
@@ -382,10 +329,8 @@ launch_cluster(){
 
   "launch_cluster::${K8S_RUNTIME}"
 
-  # Kata-post
-  [ "${INSTALL_KATA}" -eq 0 ] && kubectl apply -f "${MYDIR}/utils/manifests/kata-runtime-classes.yml" \
-    && [ "${K8S_RUNTIME}" = "k3d" ] \
-    && kubectl apply -f "${MYDIR}/utils/manifests/k3d-syslogd.yml" \
+  #[ "${K8S_RUNTIME}" = "kubedee" ] && kubectl apply -f "${MYDIR}/utils/manifests/kata-runtime-classes.yml" ||:
+  [ "${K8S_RUNTIME}" = "k3d" ] && kubectl apply -f "${MYDIR}/utils/manifests/k3d-syslogd.yml" \
     && until kubectl -n kube-system wait --for condition=ready pod -l app=syslog; do sleep 1; done 2>/dev/null ||:
 }
 
@@ -459,19 +404,18 @@ install_service_mesh(){
   # Disables Citadel's SA secret generation for the namespace (unless `security.enableNamespacesByDefault` is already `false` and therefore opt-in)
   #kubectl label ns default ca.istio.io/override=false
 
-  HELMFILE_ARGS+=(
-    '-l' "name=${RELEASES_ISTIO_INIT:=istio-init}"
-    '-l' "name=${RELEASES_ISTIO:=istio}"
-    '-l' "name=${RELEASES_JAEGER_OPERATOR:=jaeger-operator}"
-    '-l' "name=${RELEASES_ISTIO_BASE:=istio-base}"
-    '-l' "name=${RELEASES_ISTIO_CONTROL:=istio-control}"
-    '-l' "name=${RELEASES_ISTIO_GATEWAY_EGRESS:=istio-egress}"
-    '-l' "name=${RELEASES_ISTIO_GATEWAY_INGRESS:=istio-ingress}"
-    '-l' "name=${RELEASES_ISTIO_POLICY:=istio-policy}"
-    '-l' "name=${RELEASES_ISTIO_TELEMETRY_KIALI:=istio-kiali}"
-    '-l' "name=${RELEASES_ISTIO_TELEMETRY_PROMETHEUS_OPERATOR:=istio-prometheus-operator}"
-    '-l' "name=${RELEASES_ISTIO_TELEMETRY_TRACING:=istio-tracing}"
-  )
+  export ENABLE_NETWORK=1 \
+    RELEASES_ISTIO_INIT="${RELEASES_ISTIO_INIT:-istio-init}" \
+    RELEASES_ISTIO="${RELEASES_ISTIO:-istio}" \
+    RELEASES_JAEGER_OPERATOR="${RELEASES_JAEGER_OPERATOR:-jaeger-operator}" \
+    RELEASES_ISTIO_BASE="${RELEASES_ISTIO_BASE:-istio-base}" \
+    RELEASES_ISTIO_CONTROL="${RELEASES_ISTIO_CONTROL:-istio-control}" \
+    RELEASES_ISTIO_GATEWAY_EGRESS="${RELEASES_ISTIO_GATEWAY_EGRESS:-istio-egress}" \
+    RELEASES_ISTIO_GATEWAY_INGRESS="${RELEASES_ISTIO_GATEWAY_INGRESS:-istio-ingress}" \
+    RELEASES_ISTIO_POLICY="${RELEASES_ISTIO_POLICY:-istio-policy}" \
+    RELEASES_ISTIO_TELEMETRY_KIALI="${RELEASES_ISTIO_TELEMETRY_KIALI:-istio-kiali}" \
+    RELEASES_ISTIO_TELEMETRY_PROMETHEUS_OPERATOR="${RELEASES_ISTIO_TELEMETRY_PROMETHEUS_OPERATOR:-istio-prometheus-operator}" \
+    RELEASES_ISTIO_TELEMETRY_TRACING="${RELEASES_ISTIO_TELEMETRY_TRACING:-istio-tracing}"
 }
 
 install_minio(){
@@ -481,8 +425,8 @@ install_minio(){
   : ${MINIO_SECRET_KEY:="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"}
   : ${MINIO_DEFAULT_BUCKET:=minio-bucket}
   : ${MINIO_SVC_PORT:=9000}
-
-  HELMFILE_ARGS+=('-l' "name=${RELEASES_MINIO:=minio}")
+  export ENABLE_MINIO=1 \
+    RELEASES_MINIO="${RELEASES_MINIO:-minio}"
 }
 
 install_openebs(){
@@ -494,12 +438,14 @@ install_openebs(){
     [ "${i}" -eq 0 ] && NODE_NAME="${K8S_RUNTIME}-${CLUSTER_NAME}-server" || NODE_NAME="${K8S_RUNTIME}-${CLUSTER_NAME}-worker-$((${i}-1))"
     docker exec "${NODE_NAME}" mkdir -p /run/udev
   done
-  HELMFILE_ARGS+=('-l' "name=${RELEASES_OPENEBS:=openebs}")
+  export RELEASES_OPENEBS="${RELEASES_OPENEBS:-openebs}"
 }
 
 install_prometheus_operator(){
   echo "Installing Prometheus Operator…"
-  local RELEASES_KUBE_PROMETHEUS_STACK="${RELEASES_KUBE_PROMETHEUS_STACK:=kube-prometheus-stack}"
+  export RELEASES_THANOS="${RELEASES_THANOS:-thanos}" \
+    RELEASES_KUBE_PROMETHEUS_STACK="${RELEASES_KUBE_PROMETHEUS_STACK:-kube-prometheus-stack}"
+    RELEASES_PROMETHEUS_ADAPTER="${RELEASES_PROMETHEUS_ADAPTER:-prometheus-adapter}"
   : ${THANOS_OBJSTORE_CONFIG_SECRET:=thanos-objstore-config}
   : ${THANOS_SIDECAR_MTLS_SECRET:=thanos-sidecar-mtls}
 
@@ -511,7 +457,6 @@ install_prometheus_operator(){
   THANOS_OBJSTORE_CONFIG_SECRET="${THANOS_OBJSTORE_CONFIG_SECRET}" \
   THANOS_OBJSTORE_CONFIG_FILENAME="${THANOS_OBJSTORE_CONFIG_FILENAME}" \
   THANOS_SIDECAR_MTLS_SECRET="${THANOS_SIDECAR_MTLS_SECRET}" \
-  RELEASES_MINIO="${RELEASES_MINIO}" \
   MINIO_DEFAULT_BUCKET="${MINIO_DEFAULT_BUCKET}" \
   MINIO_SVC_PORT="${MINIO_SVC_PORT}" \
   MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}" \
@@ -519,35 +464,29 @@ install_prometheus_operator(){
   envsubst <"${MYDIR}/utils/manifests/thanos-objstore-secret.yml.shtpl" | kubectl apply -f-
 
   NAMESPACES_MONITORING="${NAMESPACES_MONITORING}" \
-  RELEASES_KUBE_PROMETHEUS_STACK="${RELEASES_KUBE_PROMETHEUS_STACK}" \
   envsubst <"${MYDIR}/utils/manifests/thanos-prometheus-query-svc.yml.shtpl" | kubectl apply -f-
-
-  HELMFILE_ARGS+=(
-    '-l' "name=${RELEASES_THANOS:=thanos}"
-    '-l' "name=${RELEASES_KUBE_PROMETHEUS_STACK}"
-    '-l' "name=${RELEASES_PROMETHEUS_ADAPTER:=prometheus-adapter}"
-  )
 }
 
 install_storage(){
   kubectl create secret docker-registry local-harbor --docker-username=admin --docker-password="${HARBOR_ADMIN_PASSWORD:=Harbor12345}"
-  install_openebs && install_minio && HELMFILE_ARGS+=(
-    '-l' "name=${RELEASES_HARBOR:=harbor}"
-    '-l' "name=${RELEASES_PATRONI:=patroni}"
-    '-l' "name=${RELEASES_REDIS:=redis}"
-  ) ||:
+  install_openebs
+  install_minio
+  export ENABLE_STORAGE=1 \
+    RELEASES_HARBOR="${RELEASES_HARBOR:-harbor}" \
+    RELEASES_PATRONI="${RELEASES_PATRONI:-patroni}" \
+    RELEASES_REDIS="${RELEASES_HARBOR:-redis}"
 }
 
 install_monitoring(){
   kubectl get ns "${NAMESPACES_MONITORING}" &>/dev/null || kubectl create ns "${NAMESPACES_MONITORING}"
-  install_prometheus_operator && [ "${INSTALL_SERVICE_MESH}" -eq 0 ] && HELMFILE_ARGS+=(
-    '-l' "name=${RELEASES_ISTIO_PROMETHEUS_OPERATOR:=istio-prometheus-operator}"
-  ) ||:
+  install_prometheus_operator
+  export ENABLE_MONITORING=1 \
+    RELEASES_ISTIO_PROMETHEUS_OPERATOR="${RELEASES_ISTIO_PROMETHEUS_OPERATOR:=istio-prometheus-operator}"
 }
 
 install_serverless(){
-  # kubeless/knative/openfaas?
-  HELMFILE_ARGS+=('-l' "name=${RELEASES_KUBELESS:=kubeless}")
+  # kubeless/openfaas?
+  export ENABLE_SERVERLESS=1 RELEASES_KUBELESS="${RELEASES_KUBELESS:-kubeless}"
 }
 
 show_ingress_points::k3d(){
@@ -586,10 +525,7 @@ kube_up(){
   [ "${INSTALL_SERVERLESS}" -eq 0 ] && install_serverless
 
   # apply helm releases
-  helmfile --no-color --allow-no-matching-release -f "${MYDIR}/helmfile.yaml" -l name=cert-manager ${HELMFILE_ARGS[@]} sync
-
-  [ "${INSTALL_SERVICE_MESH}" -eq 0 ] && [ "${ISTIO_SIDECAR_AUTOINJECT:=0}" -eq 0 ] && echo "Marking the default namespace for Envoy injection…" && kubectl label ns default istio-injection=enabled ||:
-    #&& kubectl apply -f "${MYDIR}/utils/manifests/selfsigned-certmanager.yml" ||:
+  helmfile --no-color --allow-no-matching-release -f "${MYDIR}/helmfile.yaml" sync
 
   show_ingress_points
   echo "Now run \"kubectl proxy\" and go to http://127.0.0.1:8001/api/v1/namespaces/kubernetes-dashboard/services/http%3Akubernetes-dashboard%3A/proxy/ for your K8S dashboard."
@@ -605,30 +541,41 @@ declare -A SCRIPT_OPS=(
   [down]="kube_down"
 )
 
-print_usage(){
+usage(){
   local MYNAME="$(basename "${0}")"
   cat >&2 <<EOF
-${MYNAME%.*} - Linux-centric scaffold for K8S development
+${MYNAME%.*} - Linux-centric scaffold for local K8S development
 
-Usage: ${0} [options] <up|down>
+Usage: ${MYNAME} [options] <up|down>
 
 Options:
   --no-*, --with-*                    disable/enable installation of selected
-                                      component (choice from: kata,
-                                        registry-proxy, monitoring, serverless,
-                                        service-mesh, storage, local-registry)
-                                      (env: non-zero value on INSTALL_*)
-  -N <name>, --name <name>            cluster name
-                                      (default: ${CLUSTER_NAME}, env: CLUSTER_NAME)
-  -n <num>, --num <num>               number of workers
-                                      (default: nproc/4, env: NUM_WORKERS)
-  -r <runtime>, --runtime <runtime>   runtime choice
-                                      (default: ${K8S_RUNTIME}, env: K8S_RUNTIME)
-                                      (choice of: k3d, kubedee)
-  -t <tag>, --tag <tag>               runtime version
-                                      (default: ${RUNTIME_TAG}, env: RUNTIME_TAG)
+                                      component (choice of: registry-proxy,
+                                        monitoring, serverless, service-mesh,
+                                        storage, local-registry,
+                                        env: non-zero value on INSTALL_*)
+  -N <name>, --name <name>            cluster name (default: ${CLUSTER_NAME},
+                                        env: CLUSTER_NAME)
+  -n <num>, --num <num>               number of workers (default: \`nproc\`/4,
+                                        env: NUM_WORKERS)
+  -r <runtime>, --runtime <runtime>   runtime choice (default: ${K8S_RUNTIME},
+                                        choice of: k3d, kubedee,
+                                        env: K8S_RUNTIME)
+  -t <tag>, --tag <tag>               set runtime version (env: RUNTIME_TAG)
   -s <pool>, --storage-pool <pool>    LXD storage pool to use with Kubedee
-                                      (default: ${LXD_STORAGE_POOL}, env: LXD_STORAGE_POOL)
+                                        (default: ${LXD_STORAGE_POOL},
+                                        env: LXD_STORAGE_POOL)
+  --vm                                launch cluster in LXD VMs, instead of LXD
+                                        containers (requires \`-r kubedee\`)
+  -c <mem>, --controller-mem <mem>    memory to allocate towards K8S controller
+                                        (requires \`--vm\`, default: ${CONTROLLER_MEMORY_SIZE},
+                                        env: CONTROLLER_MEMORY_SIZE)
+  -w <mem>, --worker-mem <mem>        memory to allocate per K8S worker
+                                        (requires \`--vm\`, default: ${WORKER_MEMORY_SIZE},
+                                        env: WORKER_MEMORY_SIZE)
+  -R <size>, --rootfs-size <size>     build rootfs image of provided size
+                                        (requires \`--vm\`, default: ${ROOTFS_SIZE},
+                                        env: ROOTFS_SIZE)
 
 Environment variables:
 
@@ -654,6 +601,10 @@ main(){
   : ${CLUSTER_NAME:=k3s-default}
   : ${NUM_WORKERS:=${DEFAULT_WORKERS}}
   : ${LXD_STORAGE_POOL:=default}
+
+  : ${CONTROLLER_MEMORY_SIZE:=2GiB}
+  : ${WORKER_MEMORY_SIZE:=4GiB}
+  : ${ROOTFS_SIZE:=20GiB}
 
   while [ "${#}" -gt 0 ]; do
     case "${1}" in
@@ -703,18 +654,37 @@ main(){
         LXD_STORAGE_POOL="${2}"
         shift 2
         ;;
+      --vm)
+        VM_MODE="--vm"
+        shift
+        ;;
+      -c | --controller-mem)
+        CONTROLLER_MEMORY_SIZE="${2}"
+        shift 2
+        ;;
+      -w | --worker-mem)
+        WORKER_MEMORY_SIZE="${2}"
+        shift 2
+        ;;
+      -R | --rootfs-size)
+        ROOTFS_SIZE="${2}"
+        shift 2
+        ;;
       up | down)
         SCRIPT_OP="${1}"
         shift
         ;;
-      *)
-        print_usage
-        ;;
+      *) usage;;
     esac
   done
 
-  [ -z "${SCRIPT_OP}" ] && print_usage
+  [ -z "${SCRIPT_OP}" ] && usage
 
+  KUBEDEE_OPTS+=("${VM_MODE}"
+    '--rootfs-size' "${ROOTFS_SIZE}"
+    '--controller-limits-memory' "${CONTROLLER_MEMORY_SIZE}"
+    '--worker-limits-memory' "${WORKER_MEMORY_SIZE}"
+  )
   declare -A NAMESPACES=(
     [monitoring]="${NAMESPACES_MONITORING:=monitoring}"
     [network]="${NAMESPACES_NETWORK:=network}"
@@ -731,8 +701,8 @@ main(){
   declare -A RUNTIME_VERSIONS=(
     #[k3d]="0.9.1"  # k8s-1.15
     #[k3d]="1.0.1"  # k8s-1.16
-    [k3d]="${RUNTIME_TAG:-1.20.2-k3s1}"
-    [kubedee]="${RUNTIME_TAG:-1.20.2}"
+    [k3d]="${RUNTIME_TAG:-1.20.4-k3s1}"
+    [kubedee]="${RUNTIME_TAG:-1.20.4}"
   )
   echo "${RUNTIME_VERSIONS[k3d]}" | grep -E '^0\.[0-9]\.' && OLD_K3S=0 || OLD_K3S=1
   [ "${OLD_K3S}" -eq 0 ] && SHIM_VERSION=v1 || SHIM_VERSION=v2
@@ -740,7 +710,7 @@ main(){
   : ${CLUSTER_CONFIG_HOST_PATH:=/var/tmp/k3s/${CLUSTER_NAME}}
 
   # registry proxy config
-  : ${REGISTRY_PROXY_REPO:="rpardini/docker-registry-proxy:0.6.1"}
+  : ${REGISTRY_PROXY_REPO:="rpardini/docker-registry-proxy:0.6.3"}
   REGISTRY_PROXY_DOCKER_ARGS=()
   : ${REGISTRY_PROXY_HOSTNAME:="${K8S_RUNTIME}-${CLUSTER_NAME}-registry-proxy-cache.local"}
   : ${REGISTRY_PROXY_HOST_PATH:=/var/tmp/oci-registry}
